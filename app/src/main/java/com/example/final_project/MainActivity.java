@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                     download_block();
+                    get_rule_break();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -71,6 +72,24 @@ public class MainActivity extends AppCompatActivity {
         };
 
         handler.postDelayed(r, 1000);
+    }
+
+    public void get_rule_break(){
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = "http://18.117.75.236:5000/api/getbreak/?room=" + room;
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        comment.setText("You have been too noisy for " + response + " times!");
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+            }
+        });
+        queue.add(stringRequest);
     }
 
     public void download_block(){
@@ -82,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(String response) {
                         WifiManager manager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                        if (response == "1"){
+                        if (response.equals("1")){
                             manager.setWifiEnabled(false);
                         }
                         else
@@ -135,7 +154,6 @@ public class MainActivity extends AppCompatActivity {
                 textView.setText("You are not connected!");
             }
         });
-
         queue.add(stringRequest);
     }
 
@@ -155,7 +173,10 @@ public class MainActivity extends AppCompatActivity {
                     public void onResponse(String response) {
                         try {
                             JSONObject js = new JSONObject(response);
-                            hello.setText(js.getString("h"));
+                            if (room == 2)
+                                hello.setText(js.getString("h"));
+                            else
+                                hello.setText(js.getString("t"));
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
