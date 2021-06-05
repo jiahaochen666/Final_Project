@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Lab4</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.1.0/echarts.min.js" integrity="sha512-W7jN6TS8p1Qwh4GSXsXh0tWSdAXN4v0MEgq9uOsYcz8A/KxzSPzBL1jDPErfgKUMb11QV2BknSzY/HltjLKPfg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<style>
+#chart {
+    width: 1200px;
+    height: 800px;
+}
+</style>
+
+</head>
+<body>
+
+<div id='chart'></div>
+
+<script>
+var chartDom = $('#chart').get(0);
+var chart = echarts.init(chartDom);
+option = {
+    title: {
+        text: 'Lab4'
+    },
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+            type: 'cross',
+            label: {
+                backgroundColor: '#283b56'
+            }
+        }
+    },
+    toolbox: {
+        show: true,
+        feature: {
+            dataView: {readOnly: false},
+            restore: {},
+            saveAsImage: {}
+        }
+    },
+    dataZoom: {
+        show: false,
+        start: 0,
+        end: 100
+    },
+    xAxis: [
+        {
+            type: 'category',
+            boundaryGap: true,
+            data: (function (){
+                var now = new Date();
+                var res = [];
+                var len = 10;
+                while (len--) {
+                    res.unshift(now.toLocaleTimeString().replace(/^\D*/,''));
+                    now = new Date(now - 1000);
+                }
+                return res;
+            })()
+        },{
+            type: 'category',
+            boundaryGap: true,
+            data: (function (){
+                var now = new Date();
+                var res = [];
+                var len = 10;
+                while (len--) {
+                    res.unshift(now.toLocaleTimeString().replace(/^\D*/,''));
+                    now = new Date(now - 1000);
+                }
+                return res;
+            })()
+        },
+    ],
+    yAxis: [
+        {
+            type: 'value',
+            scale: true,
+            name: 'Sound level',
+            max: 4400,
+            min: 0,
+            interval:200,
+        }
+    ],
+    series: [
+        {
+            name: 'Sound level',
+            type: 'line',
+            data: (function (){
+                var res = [];
+                var len = 10;
+                while (len--) {
+                    res.push(0);
+                }
+                return res;
+            })()
+        },{
+            name: 'Time',
+            type: 'line',
+            data: (function (){
+                var res = [];
+                var len = 10;
+                while (len--) {
+                    res.push(0);
+                }
+                return res;
+            })()
+        },
+    ]
+};
+
+setInterval(function() {
+    $.ajax('/get/').done((d) => {
+        var axisData = (new Date()).toLocaleTimeString().replace(/^\D*/, '');
+        var humidityData = option.series[0].data;
+        var tempData = option.series[1].data;
+        humidityData.shift();
+        humidityData.push(d.h);
+        tempData.shift();
+        tempData.push(d.t);
+        option.xAxis[0].data.shift();
+        option.xAxis[0].data.push(axisData);
+        chart.setOption(option);
+    });
+}, 400);
+
+</script>
+
+</body>
+</html>
